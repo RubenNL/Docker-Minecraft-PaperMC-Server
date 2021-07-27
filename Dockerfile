@@ -1,7 +1,7 @@
 ########################################################
 ############## We use a java base image ################
 ########################################################
-FROM openjdk:16-alpine AS build
+FROM arm32v7/adoptopenjdk:16 AS build
 
 MAINTAINER Marc Tönsing <marc@marc.tv>
 
@@ -14,7 +14,7 @@ WORKDIR /opt/minecraft
 ADD ${PAPERSPIGOT_CI_URL} paperclip.jar
 
 # Run paperclip and obtain patched jar
-RUN /opt/openjdk-16/bin/java -jar /opt/minecraft/paperclip.jar; exit 0
+RUN java -jar /opt/minecraft/paperclip.jar; exit 0
 
 # Copy built jar
 RUN mv /opt/minecraft/cache/patched*.jar paperspigot.jar
@@ -22,7 +22,7 @@ RUN mv /opt/minecraft/cache/patched*.jar paperspigot.jar
 ########################################################
 ############## Running environment #####################
 ########################################################
-FROM openjdk:16-alpine AS runtime
+FROM arm32v7/adoptopenjdk:16 AS runtime
 
 # Working directory
 WORKDIR /data
@@ -56,11 +56,5 @@ WORKDIR /data
 COPY /docker-entrypoint.sh /opt/minecraft
 RUN chmod +x /opt/minecraft/docker-entrypoint.sh
 
-# Install gosu
-RUN set -eux; \
-	apk update; \
-	apk add --no-cache su-exec;
-
-# Entrypoint
 ENTRYPOINT ["/opt/minecraft/docker-entrypoint.sh"]
 
